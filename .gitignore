@@ -67,6 +67,7 @@ yarn-debug.log*
 !/storage/.keep
 
 /src/main/resources/application.properties
+/src/main/resources/schema.sql
 /target
 library_management.iml
 .idea

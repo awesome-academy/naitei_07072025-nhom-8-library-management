@@ -25,3 +25,21 @@ spring.thymeleaf.suffix=.html
 spring.thymeleaf.mode=HTML
 spring.thymeleaf.encoding=UTF-8
 spring.thymeleaf.cache=false
+
+# ===============================
+# = JWT Security
+# ===============================
+# Secret key for signing JWT tokens
+# This should be kept secret and not shared publicly
+security.jwt.secret-key=your_secret_key
+# 1h in millisecond
+security.jwt.expiration-time=3600000
+
+# ===============================
+# = Email Configuration
+# ===============================
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email
+spring.mail.password=your_app_password
+spring.mail.properties.mail.smtp.auth=true
