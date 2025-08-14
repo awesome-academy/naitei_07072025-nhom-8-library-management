@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - Library Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<div class="login-container">
+    <!-- bouncing shapes -->
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- card login -->
+    <div class="login-card">
+        <!-- header -->
+        <div class="login-header">
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h1>Library Admin</h1>
+            <p>Sign in to your admin account</p>
+        </div>
+
+        <!-- login form -->
+        <form th:action="@{/admin/login}" method="post" class="login-form">
+            <!-- username -->
+            <div class="form-group">
+                <label for="username" class="form-label">
+                    <i class="fas fa-user"></i>
+                    Username
+                </label>
+                <div class="input-wrapper">
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           class="form-input"
+                           placeholder="Enter your username"
+                           autocomplete="username"
+                           required>
+                    <div class="input-focus-border"></div>
+                </div>
+            </div>
+
+            <!-- password -->
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Password
+                </label>
+                <div class="input-wrapper">
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           class="form-input"
+                           placeholder="Enter your password"
+                           autocomplete="current-password"
+                           required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                    <div class="input-focus-border"></div>
+                </div>
+            </div>
+
+            <!-- báo lỗi khi đăng nhập -->
+            <div th:if="${param.error}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Invalid username or password</span>
+            </div>
+
+            <!-- tin nhắn khi đăng xuất thành công -->
+            <div th:if="${param.logout}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span>You have been logged out successfully</span>
+            </div>
+
+            <!-- submit -->
+            <button type="submit" class="login-btn">
+                <span class="btn-text">Sign In</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <!-- footer -->
+        <div class="login-footer">
+            <p>&copy; 2025 Library Management System</p>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/login.js}"></script>
+
+
+</body>
+</html>
