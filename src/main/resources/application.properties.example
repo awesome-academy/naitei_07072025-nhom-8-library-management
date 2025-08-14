@@ -27,6 +27,12 @@ spring.thymeleaf.encoding=UTF-8
 spring.thymeleaf.cache=false
 
 # ===============================
+# = Swagger
+# ===============================
+springdoc.swagger-ui.url=/swagger/library-api.json
+springdoc.swagger-ui.path=/swagger-ui.html
+
+# ===============================
 # = JWT Security
 # ===============================
 # Secret key for signing JWT tokens

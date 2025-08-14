@@ -1,0 +1,3366 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "Demo quan ly thu vien\n",
+    "version": "1.0.0",
+    "title": "Nhom8-Library_Management"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Đăng nhập, đăng ký và đăng xuất"
+    },
+    {
+      "name": "books",
+      "description": "Các endpoint liên quan đến quản lý và tìm kiếm sách"
+    },
+    {
+      "name": "user",
+      "description": "Các endpoint của người dùng sau khi đăng nhập"
+    },
+    {
+      "name": "admin",
+      "description": "Các endpoint của admin"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Đăng ký tài khoản mới",
+        "description": "Đăng ký tài khoản mới với thông tin username, password, fullName, email và phone.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "user123"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "fullName": {
+                    "type": "string",
+                    "example": "Nguyễn Văn A"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "0123456789"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password",
+                  "fullName",
+                  "email",
+                  "phone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tạo tài khoản thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tài khoản đã được tạo thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Thông tin đăng ký không hợp lệ hoặc đã tồn tại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Username/Email/Phone đã tồn tại."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Đăng nhập",
+        "description": "Đăng nhập bằng username và password, trả về JWT token nếu thành công.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "user123"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sai username hoặc password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Sai username hoặc password."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Đăng xuất",
+        "description": "Đăng xuất người dùng hiện tại. Yêu cầu gửi kèm JWT token trong header Authorization.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Đăng xuất thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Đăng xuất thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Không có quyền truy cập hoặc token không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Token không hợp lệ hoặc đã hết hạn."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/search": {
+      "post": {
+        "tags": ["books"],
+        "summary": "Tìm kiếm sách",
+        "description": "Tìm kiếm sách theo tiêu chí title, authors, publisher, genres.  \nCó hỗ trợ phân trang với `page` và `size` trong query parameters.\n",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 10
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": ["Lập trình Java", "Spring Boot"]
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": ["Nguyễn Văn A"]
+                  },
+                  "publisher": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": ["NXB Giáo dục"]
+                  },
+                  "genres": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": ["Công nghệ", "Lập trình"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Kết quả tìm kiếm",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 50
+                    },
+                    "books": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Lập trình Java cơ bản"
+                          },
+                          "author": {
+                            "type": "string",
+                            "example": "Nguyễn Văn A"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "example": "Công nghệ"
+                          },
+                          "publisher": {
+                            "type": "string",
+                            "example": "NXB Giáo dục"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "examples": {
+              "success": {
+                "summary": "Có kết quả",
+                "value": {
+                  "totalPages": 5,
+                  "totalItems": 50,
+                  "books": [
+                    {
+                      "id": 1,
+                      "title": "Lập trình Java cơ bản",
+                      "author": "Nguyễn Văn A",
+                      "genre": "Công nghệ",
+                      "publisher": "NXB Giáo dục"
+                    }
+                  ]
+                }
+              },
+              "empty": {
+                "summary": "Không có kết quả",
+                "value": {
+                  "totalPages": 0,
+                  "totalItems": 0,
+                  "books": []
+                }
+              }
+            }
+          },
+          "200_empty": {
+            "description": "Không có kết quả nào phù hợp",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "borrow_requests": {
+                      "type": "array",
+                      "example": []
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books": {
+      "get": {
+        "tags": ["books"],
+        "summary": "Lấy danh sách tất cả sách trong thư viện",
+        "description": "Trả về danh sách tất cả sách trong thư viện.  \nCó hỗ trợ phân trang với `page` và `size` trong query parameters.\n",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 50
+                    },
+                    "books": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Lập trình Java cơ bản"
+                          },
+                          "author": {
+                            "type": "string",
+                            "example": "Nguyễn Văn A"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "example": "Công nghệ"
+                          },
+                          "publisher": {
+                            "type": "string",
+                            "example": "NXB Giáo dục"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "examples": {
+              "success": {
+                "summary": "Có dữ liệu",
+                "value": {
+                  "totalPages": 5,
+                  "totalItems": 50,
+                  "books": [
+                    {
+                      "id": 1,
+                      "title": "Lập trình Java cơ bản",
+                      "author": "Nguyễn Văn A",
+                      "genre": "Công nghệ",
+                      "publisher": "NXB Giáo dục"
+                    },
+                    {
+                      "id": 2,
+                      "title": "Spring Boot nâng cao",
+                      "author": "Trần Thị B",
+                      "genre": "Công nghệ",
+                      "publisher": "NXB Công nghệ"
+                    }
+                  ]
+                }
+              },
+              "empty": {
+                "summary": "Không có dữ liệu",
+                "value": {
+                  "totalPages": 0,
+                  "totalItems": 0,
+                  "books": []
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "tags": ["books"],
+        "summary": "Lấy thông tin chi tiết của một cuốn sách",
+        "description": "Trả về thông tin chi tiết của một cuốn sách dựa trên ID.\n",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thông tin chi tiết sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "book": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "Lập trình Java cơ bản"
+                        },
+                        "author": {
+                          "type": "string",
+                          "example": "Nguyễn Văn A"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "example": "Công nghệ"
+                        },
+                        "publisher": {
+                          "type": "string",
+                          "example": "NXB Giáo dục"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không tìm thấy sách với ID đã cho."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/comments": {
+      "post": {
+        "tags": ["books"],
+        "summary": "Thêm bình luận sách",
+        "description": "Thêm bình luận mới cho sách hoặc trả lời một bình luận đã có.  \nNgười dùng phải đã mượn sách này mới có thể bình luận.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["book_id", "comment"],
+                "properties": {
+                  "book_id": {
+                    "type": "integer",
+                    "example": 101
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Cuốn sách này rất hay!"
+                  },
+                  "parent_comment_id": {
+                    "type": "integer",
+                    "nullable": true,
+                    "description": "ID của bình luận cha (nếu trả lời), để null nếu là bình luận mới",
+                    "example": 55
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thêm bình luận thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Bình luận đã được thêm thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Người dùng chưa mượn sách này hoặc dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Chưa mượn sách này."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Xem thông tin cá nhân",
+        "description": "Lấy thông tin cá nhân của người dùng hiện tại.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy thông tin thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "nguyenvana"
+                    },
+                    "full_name": {
+                      "type": "string",
+                      "example": "Nguyễn Văn A"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "nguyenvana@example.com"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "0987654321"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "example": "https://example.com/avatar.jpg"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi server",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Lỗi hệ thống, vui lòng thử lại sau."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["user"],
+        "summary": "Cập nhật thông tin cá nhân",
+        "description": "Cập nhật thông tin cá nhân của người dùng hiện tại.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "full_name": {
+                    "type": "string",
+                    "example": "Nguyễn Văn A"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "nguyenvana@example.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "0987654321"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "example": "https://example.com/avatar.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thông tin thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "example": "nguyenvana"
+                    },
+                    "full_name": {
+                      "type": "string",
+                      "example": "Nguyễn Văn A"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "example": "nguyenvana@example.com"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "0987654321"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "example": "https://example.com/avatar.jpg"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi cập nhật thông tin",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email hoặc số điện thoại đã được sử dụng."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/favourites": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Danh sách sách yêu thích của người dùng",
+        "description": "Trả về danh sách sách mà người dùng hiện tại đã đánh dấu yêu thích.  \nCó hỗ trợ phân trang với `page` và `size` trong query parameters.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách sách yêu thích",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 25
+                    },
+                    "books": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Lập trình Java cơ bản"
+                          },
+                          "author": {
+                            "type": "string",
+                            "example": "Nguyễn Văn A"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "example": "Công nghệ"
+                          },
+                          "publisher": {
+                            "type": "string",
+                            "example": "NXB Giáo dục"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "examples": {
+              "success": {
+                "summary": "Có dữ liệu",
+                "value": {
+                  "totalPages": 3,
+                  "totalItems": 25,
+                  "books": [
+                    {
+                      "id": 1,
+                      "title": "Lập trình Java cơ bản",
+                      "author": "Nguyễn Văn A",
+                      "genre": "Công nghệ",
+                      "publisher": "NXB Giáo dục"
+                    },
+                    {
+                      "id": 2,
+                      "title": "Spring Boot nâng cao",
+                      "author": "Trần Thị B",
+                      "genre": "Công nghệ",
+                      "publisher": "NXB Công nghệ"
+                    }
+                  ]
+                }
+              },
+              "empty": {
+                "summary": "Không có dữ liệu",
+                "value": {
+                  "totalPages": 0,
+                  "totalItems": 0,
+                  "books": []
+                }
+              }
+            }
+          },
+          "200_empty": {
+            "description": "Người dùng không yêu thích sách nào",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "borrow_requests": {
+                      "type": "array",
+                      "example": []
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/follows": {
+      "post": {
+        "tags": ["user"],
+        "summary": "Theo dõi tác giả hoặc nhà xuất bản",
+        "description": "Người dùng theo dõi tác giả hoặc nhà xuất bản.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["target_type", "target_id"],
+                "properties": {
+                  "target_type": {
+                    "type": "string",
+                    "enum": ["author", "publisher"],
+                    "example": "author"
+                  },
+                  "target_id": {
+                    "type": "integer",
+                    "example": 15
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Theo dõi thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Đã theo dõi tác giả thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi theo dõi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tác giả hoặc nhà xuất bản không tồn tại."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["user"],
+        "summary": "Bỏ theo dõi tác giả hoặc nhà xuất bản",
+        "description": "Người dùng bỏ theo dõi tác giả hoặc nhà xuất bản.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["target_type", "target_id"],
+                "properties": {
+                  "target_type": {
+                    "type": "string",
+                    "enum": ["author", "publisher"],
+                    "example": "publisher"
+                  },
+                  "target_id": {
+                    "type": "integer",
+                    "example": 8
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bỏ theo dõi thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Đã bỏ theo dõi nhà xuất bản thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi bỏ theo dõi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không tìm thấy đối tượng để bỏ theo dõi."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/ratings": {
+      "post": {
+        "tags": ["books"],
+        "summary": "Đánh giá sách",
+        "description": "Gửi đánh giá cho một cuốn sách.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "book_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 4
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Sách hay, nội dung dễ hiểu và hữu ích."
+                  }
+                },
+                "required": ["book_id", "rating"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đánh giá thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Đánh giá sách thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi gửi đánh giá",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không thể gửi đánh giá. Kiểm tra lại dữ liệu."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/borrow-records": {
+      "get": {
+        "tags": ["user"],
+        "summary": "Danh sách lịch sử mượn sách của người dùng",
+        "description": "Trả về danh sách các lần mượn sách của người dùng hiện tại.  \nCó hỗ trợ phân trang với `page` và `size` trong query parameters.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Danh sách các lần mượn sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 4
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 32
+                    },
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "example": "Lập trình Java cơ bản"
+                          },
+                          "borrowed_at": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-08-01"
+                          },
+                          "due_date": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-08-15"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["borrowed", "returned", "overdue"],
+                            "example": "borrowed"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "examples": {
+              "success": {
+                "summary": "Có dữ liệu",
+                "value": {
+                  "totalPages": 4,
+                  "totalItems": 32,
+                  "records": [
+                    {
+                      "title": "Lập trình Java cơ bản",
+                      "borrowed_at": "2025-08-01",
+                      "due_date": "2025-08-15",
+                      "status": "borrowed"
+                    },
+                    {
+                      "title": "Spring Boot nâng cao",
+                      "borrowed_at": "2025-07-20",
+                      "due_date": "2025-08-05",
+                      "status": "returned"
+                    }
+                  ]
+                }
+              },
+              "empty": {
+                "summary": "Không có dữ liệu",
+                "value": {
+                  "totalPages": 0,
+                  "totalItems": 0,
+                  "records": []
+                }
+              }
+            }
+          },
+          "200_empty": {
+            "description": "Không có yêu cầu mượn nào",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "borrow_requests": {
+                      "type": "array",
+                      "example": []
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/favourites/{book_id}": {
+      "post": {
+        "tags": ["user"],
+        "summary": "Thêm sách vào danh sách yêu thích",
+        "description": "Thêm một cuốn sách vào danh sách yêu thích của người dùng.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "book_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Thêm vào yêu thích thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Đã thêm sách vào danh sách yêu thích."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi thêm vào yêu thích",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Sách đã tồn tại trong danh sách yêu thích."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["user"],
+        "summary": "Xóa sách khỏi danh sách yêu thích",
+        "description": "Xóa một cuốn sách khỏi danh sách yêu thích của người dùng.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "book_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa khỏi yêu thích thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Đã xóa sách khỏi danh sách yêu thích."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi xóa khỏi yêu thích",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Sách không tồn tại trong danh sách yêu thích."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/changePassword": {
+      "put": {
+        "tags": ["user"],
+        "summary": "Đổi mật khẩu",
+        "description": "Cho phép người dùng đổi mật khẩu của mình.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["old_password", "new_password"],
+                "properties": {
+                  "old_password": {
+                    "type": "string",
+                    "example": "123456"
+                  },
+                  "new_password": {
+                    "type": "string",
+                    "example": "NewPassword@123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đổi mật khẩu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Mật khẩu đã được thay đổi thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi đổi mật khẩu (mật khẩu cũ sai hoặc không hợp lệ)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Mật khẩu cũ không đúng."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/borrow-request": {
+      "post": {
+        "tags": ["user"],
+        "summary": "Gửi yêu cầu mượn sách",
+        "description": "Người dùng gửi yêu cầu mượn sách với danh sách bản sao cụ thể.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["from_date", "copies"],
+                "properties": {
+                  "from_date": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "2025-08-15"
+                  },
+                  "copies": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["copy_id", "to_date"],
+                      "properties": {
+                        "copy_id": {
+                          "type": "integer",
+                          "example": 101
+                        },
+                        "to_date": {
+                          "type": "string",
+                          "format": "date",
+                          "example": "2025-09-15"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gửi yêu cầu mượn sách thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Yêu cầu mượn sách đã được ghi nhận."
+                    },
+                    "request_id": {
+                      "type": "integer",
+                      "example": 2024
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi gửi yêu cầu mượn sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Bản sao sách không khả dụng."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/borrow-request/{request-id}": {
+      "delete": {
+        "tags": ["user"],
+        "summary": "Hủy yêu cầu mượn sách",
+        "description": "Người dùng hủy một yêu cầu mượn sách đã gửi trước đó.  \nYêu cầu gửi JWT token trong header `Authorization`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request-id",
+            "in": "path",
+            "required": true,
+            "description": "ID của yêu cầu mượn cần hủy",
+            "schema": {
+              "type": "integer",
+              "example": 2024
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hủy yêu cầu mượn thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Yêu cầu mượn đã được hủy thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi hủy yêu cầu mượn sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không thể hủy yêu cầu này."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Lấy danh sách người dùng",
+        "description": "Lấy danh sách tất cả người dùng trong hệ thống.  \nChỉ admin mới có quyền truy cập endpoint này.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Số trang",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "example": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "description": "Số lượng bản ghi mỗi trang",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách người dùng thành công hoặc rỗng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "username": {
+                            "type": "string",
+                            "example": "johndoe"
+                          },
+                          "email": {
+                            "type": "string",
+                            "example": "johndoe@example.com"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["active", "inactive", "banned"],
+                            "example": "active"
+                          }
+                        }
+                      }
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 50
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền truy cập",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Bạn không có quyền truy cập endpoint này."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "put": {
+        "tags": ["admin"],
+        "summary": "Cập nhật thông tin hoặc trạng thái người dùng",
+        "description": "Admin có thể cập nhật email, status hoặc các thông tin khác của người dùng.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "updated@example.com"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["active", "inactive", "banned"],
+                    "example": "banned"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thông tin người dùng đã được cập nhật."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email không hợp lệ."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/genres": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Lấy danh sách thể loại sách",
+        "description": "Lấy danh sách tất cả thể loại sách trong hệ thống.\nCó thể phân trang hoặc trả về toàn bộ.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Số trang",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "example": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "description": "Số lượng bản ghi mỗi trang",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách thể loại thành công hoặc rỗng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "genres": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Tiểu thuyết"
+                          },
+                          "parent_id": {
+                            "type": "integer",
+                            "nullable": true,
+                            "example": null
+                          }
+                        }
+                      }
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 50
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Không có quyền truy cập",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Bạn không có quyền truy cập endpoint này."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["admin"],
+        "summary": "Thêm thể loại sách mới",
+        "description": "Admin thêm mới thể loại sách.\nNếu là thể loại con thì `parent_id` phải tồn tại trong bảng genres.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Ngôn tình"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "nullable": true,
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thêm thể loại thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thể loại đã được thêm thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc tên thể loại đã tồn tại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tên thể loại đã tồn tại."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/genres/{id}": {
+      "put": {
+        "tags": ["admin"],
+        "summary": "Cập nhật thông tin thể loại",
+        "description": "Admin có thể sửa tên hoặc thay đổi thể loại cha.\nNếu thể loại cha bị xóa thì `parent_id` sẽ được set `null`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Trinh thám"
+                  },
+                  "parent_id": {
+                    "type": "integer",
+                    "nullable": true,
+                    "example": null
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thể loại đã được cập nhật."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tên thể loại đã tồn tại."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["admin"],
+        "summary": "Xóa thể loại sách",
+        "description": "Xóa thể loại khỏi hệ thống.\nNếu là thể loại cha, các thể loại con sẽ có `parent_id = null`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thể loại đã được xóa."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy thể loại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không tìm thấy thể loại."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/authors": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Thêm tác giả mới",
+        "description": "Admin thêm tác giả mới vào hệ thống.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Nguyễn Nhật Ánh"
+                  },
+                  "biography": {
+                    "type": "string",
+                    "example": "Nhà văn nổi tiếng với nhiều tác phẩm dành cho thiếu nhi."
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "example": "/uploads/authors/nguyen-nhat-anh.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thêm tác giả thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tác giả đã được thêm thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc tên tác giả đã tồn tại"
+          }
+        }
+      }
+    },
+    "/admin/authors/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Xem chi tiết tác giả",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy thông tin tác giả thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nguyễn Nhật Ánh"
+                    },
+                    "biography": {
+                      "type": "string",
+                      "example": "Nhà văn nổi tiếng với nhiều tác phẩm dành cho thiếu nhi."
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "example": "/uploads/authors/nguyen-nhat-anh.jpg"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-08-12T14:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy tác giả"
+          }
+        }
+      },
+      "put": {
+        "tags": ["admin"],
+        "summary": "Cập nhật thông tin tác giả",
+        "description": "Admin cập nhật tên, tiểu sử hoặc avatar tác giả.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Nguyễn Nhật Ánh"
+                  },
+                  "biography": {
+                    "type": "string",
+                    "example": "Tiểu sử mới của tác giả."
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "example": "/uploads/authors/nguyen-nhat-anh-updated.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thông tin tác giả đã được cập nhật."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc tên đã tồn tại"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["admin"],
+        "summary": "Xóa tác giả",
+        "description": "Admin xóa tác giả khỏi hệ thống.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tác giả đã được xóa."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy tác giả"
+          }
+        }
+      }
+    },
+    "/admin/publishers": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Thêm nhà xuất bản mới",
+        "description": "Admin thêm nhà xuất bản mới vào hệ thống.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "NXB Kim Đồng"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "55 Quang Trung, Hà Nội"
+                  },
+                  "logo": {
+                    "type": "string",
+                    "example": "/uploads/publishers/kim-dong.png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thêm nhà xuất bản thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Nhà xuất bản đã được thêm thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc tên nhà xuất bản đã tồn tại"
+          }
+        }
+      }
+    },
+    "/admin/publishers/{id}": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Xem chi tiết nhà xuất bản",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy thông tin nhà xuất bản thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "NXB Kim Đồng"
+                    },
+                    "address": {
+                      "type": "string",
+                      "example": "55 Quang Trung, Hà Nội"
+                    },
+                    "logo": {
+                      "type": "string",
+                      "example": "/uploads/publishers/kim-dong.png"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-08-12T14:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy nhà xuất bản"
+          }
+        }
+      },
+      "put": {
+        "tags": ["admin"],
+        "summary": "Cập nhật thông tin nhà xuất bản",
+        "description": "Admin cập nhật tên, địa chỉ hoặc logo nhà xuất bản.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "NXB Kim Đồng"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "Số 1 Tràng Tiền, Hà Nội"
+                  },
+                  "logo": {
+                    "type": "string",
+                    "example": "/uploads/publishers/kim-dong-updated.png"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thông tin nhà xuất bản đã được cập nhật."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc tên đã tồn tại"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["admin"],
+        "summary": "Xóa nhà xuất bản",
+        "description": "Admin xóa nhà xuất bản khỏi hệ thống.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Nhà xuất bản đã được xóa."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy nhà xuất bản"
+          }
+        }
+      }
+    },
+    "/admin/books": {
+      "post": {
+        "tags": ["admin"],
+        "summary": "Thêm sách mới",
+        "description": "Admin thêm sách mới vào hệ thống thư viện.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "author_id",
+                  "genre_id",
+                  "publisher_id",
+                  "borrow_duration_days",
+                  "total_quantity",
+                  "available_quantity"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Harry Potter và Hòn đá Phù thủy"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Cuốn sách mở đầu cho loạt truyện nổi tiếng của J.K. Rowling."
+                  },
+                  "author_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "genre_id": {
+                    "type": "integer",
+                    "example": 5
+                  },
+                  "publisher_id": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "published_year": {
+                    "type": "integer",
+                    "example": 1997
+                  },
+                  "borrow_duration_days": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 14
+                  },
+                  "total_quantity": {
+                    "type": "integer",
+                    "example": 50
+                  },
+                  "available_quantity": {
+                    "type": "integer",
+                    "example": 50
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Thêm sách thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Sách đã được thêm thành công."
+                    },
+                    "book_id": {
+                      "type": "integer",
+                      "example": 101
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ hoặc thiếu thông tin bắt buộc"
+          },
+          "500": {
+            "description": "Lỗi truy xuất database"
+          }
+        }
+      }
+    },
+    "/admin/books/{id}": {
+      "put": {
+        "tags": ["admin"],
+        "summary": "Cập nhật thông tin sách",
+        "description": "Admin cập nhật thông tin sách trong hệ thống.  \nTrường nào không truyền sẽ giữ nguyên giá trị cũ.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID của sách cần cập nhật",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Harry Potter và Hòn đá Phù thủy"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Cuốn sách mở đầu cho loạt truyện nổi tiếng của J.K. Rowling."
+                  },
+                  "author_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "genre_id": {
+                    "type": "integer",
+                    "example": 5
+                  },
+                  "publisher_id": {
+                    "type": "integer",
+                    "example": 3
+                  },
+                  "published_year": {
+                    "type": "integer",
+                    "example": 1997
+                  },
+                  "borrow_duration_days": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 14
+                  },
+                  "total_quantity": {
+                    "type": "integer",
+                    "example": 50
+                  },
+                  "available_quantity": {
+                    "type": "integer",
+                    "example": 48
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Thông tin sách đã được cập nhật thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Dữ liệu không hợp lệ."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không tìm thấy sách."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["admin"],
+        "summary": "Xóa sách",
+        "description": "Admin xóa một sách khỏi hệ thống.  \nNếu sách đang được mượn thì không thể xóa.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID của sách cần xóa",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Xóa thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Sách đã được xóa thành công."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Không thể xóa sách do đang được mượn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không thể xóa sách này vì đang được mượn."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không tìm thấy sách."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/borrow-requests": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Lấy danh sách yêu cầu mượn sách",
+        "description": "Admin xem danh sách tất cả yêu cầu mượn sách của người dùng.  \nHỗ trợ phân trang qua query parameters `page` và `size`.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Số trang",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "description": "Số lượng bản ghi mỗi trang",
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách yêu cầu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "borrow_requests": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 101
+                          },
+                          "user_id": {
+                            "type": "integer",
+                            "example": 5
+                          },
+                          "from_date": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-08-20"
+                          },
+                          "to_date": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-09-05"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "pending",
+                              "approved",
+                              "partially_approved",
+                              "rejected",
+                              "cancelled"
+                            ],
+                            "example": "pending"
+                          },
+                          "reject_reason": {
+                            "type": "string",
+                            "nullable": true,
+                            "example": "Sách không còn bản nào khả dụng"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2025-08-12T14:30:00Z"
+                          }
+                        }
+                      }
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 50
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200_empty": {
+            "description": "Không có yêu cầu mượn nào",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "borrow_requests": {
+                      "type": "array",
+                      "example": []
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/borrow-requests/{id}": {
+      "put": {
+        "tags": ["admin"],
+        "summary": "Cập nhật trạng thái yêu cầu mượn sách",
+        "description": "Admin cập nhật trạng thái của một yêu cầu mượn sách:  \n- **approved**: Duyệt toàn bộ yêu cầu  \n- **partially_approved**: Duyệt một phần (sẽ kèm danh sách copy_id được duyệt)  \n- **rejected**: Từ chối yêu cầu (bắt buộc có lý do `reject_reason`)  \n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID của yêu cầu mượn",
+            "schema": {
+              "type": "integer",
+              "example": 101
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["approved", "partially_approved", "rejected"],
+                    "example": "approved"
+                  },
+                  "approved_copies": {
+                    "type": "array",
+                    "description": "Danh sách bản sao sách được duyệt (chỉ dùng khi `partially_approved`)",
+                    "items": {
+                      "type": "integer",
+                      "example": 501
+                    }
+                  },
+                  "reject_reason": {
+                    "type": "string",
+                    "description": "Lý do từ chối (bắt buộc nếu status = rejected)",
+                    "example": "Sách đã được mượn hết"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cập nhật trạng thái yêu cầu thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Yêu cầu đã được duyệt thành công"
+                    },
+                    "request_id": {
+                      "type": "integer",
+                      "example": 101
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi dữ liệu đầu vào hoặc trạng thái không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Vui lòng nhập lý do từ chối khi status = rejected"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Không tìm thấy yêu cầu mượn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không tìm thấy yêu cầu mượn"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/borrow-records/overdue": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Danh sách sách quá hạn trả",
+        "description": "Admin xem danh sách các bản ghi mượn sách đang ở trạng thái **overdue** (quá hạn trả).  \nYêu cầu xác thực bằng JWT token của admin.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Số trang",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "description": "Số lượng bản ghi trên mỗi trang",
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lấy danh sách sách quá hạn thành công",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "borrow_request_detail_id": {
+                            "type": "integer",
+                            "example": 3021
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Doraemon Tập 5"
+                          },
+                          "borrowed_at": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-07-01"
+                          },
+                          "due_date": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-07-15"
+                          },
+                          "returned_at": {
+                            "type": "string",
+                            "format": "date",
+                            "nullable": true,
+                            "example": null
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["borrowed", "returned", "overdue"],
+                            "example": "overdue"
+                          }
+                        }
+                      }
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 5
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 47
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "200_empty": {
+            "description": "Không có bản ghi quá hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "records": {
+                      "type": "array",
+                      "example": []
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/books/export": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Xuất danh sách sách ra file Excel",
+        "description": "Xuất toàn bộ hoặc lọc sách theo thể loại, tác giả, nhà xuất bản, năm xuất bản.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "genre_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Lọc theo ID thể loại"
+          },
+          {
+            "in": "query",
+            "name": "author_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Lọc theo ID tác giả"
+          },
+          {
+            "in": "query",
+            "name": "publisher_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Lọc theo ID nhà xuất bản"
+          },
+          {
+            "in": "query",
+            "name": "published_year",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Lọc theo năm xuất bản"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File Excel được xuất thành công",
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Lỗi khi xuất file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không thể xuất file"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/statistics/top-borrowed-books": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Thống kê Top 10 sách được mượn nhiều nhất",
+        "description": "Lấy danh sách 10 sách được mượn nhiều nhất, sắp xếp theo số lần mượn giảm dần.\n",
+        "responses": {
+          "200": {
+            "description": "Danh sách top 10 sách",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "books": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 15
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Lập Trình Java Cơ Bản"
+                          },
+                          "author": {
+                            "type": "string",
+                            "example": "Nguyễn Văn A"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "example": "Công nghệ"
+                          },
+                          "publisher": {
+                            "type": "string",
+                            "example": "NXB Khoa Học & Kỹ Thuật"
+                          },
+                          "borrow_count": {
+                            "type": "integer",
+                            "example": 128
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Lỗi khi thống kê dữ liệu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Không thể lấy dữ liệu thống kê"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "Pet": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          },
+          "application/xml": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          }
+        },
+        "description": "Pet object that needs to be added to the store",
+        "required": true
+      },
+      "UserArray": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "description": "List of user object",
+        "required": true
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    }
+  }
+}
