@@ -7,8 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -24,7 +28,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseAPIRes<?>> handleAuthFailed(AuthenticationFailedException ex) {
         logger.error("Authentication failed: {}", ex.getMessage());
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.UNAUTHORIZED) // mã lỗi 401
                 .body(BaseAPIRes.error(HttpStatus.UNAUTHORIZED.value(), ex.getMessage() != null ? ex.getMessage() : "Authentication failed"));
     }
 
@@ -38,9 +42,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseAPIRes<?>> handleGenericException(Exception ex) {
         logger.error("Unexpected error: {}", ex.getMessage(), ex);
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR) // mã lỗi 500
                 .body(BaseAPIRes.error(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                         "An unexpected error occurred"));
+    }
+
+    /**
+     * Handles lỗi khi đưa vào dữ liệu bị trùng lặp.
+     *
+     * @param ex ngoại lệ được ném ra khi dữ liệu bị trùng lặp trong database
+     * @return ResponseEntity với thông điệp lỗi và trạng thái HTTP 409 Conflict
+     * */
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<BaseAPIRes<?>> handleDuplicateResource(DuplicateResourceException ex) {
+        logger.error("Duplicate resource: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // mã lỗi 409
+                .body(BaseAPIRes.error(HttpStatus.CONFLICT.value(), ex.getMessage()));
     }
 
     /**
@@ -53,7 +71,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseAPIRes<?>> handleBadRequest(BadRequestException ex) {
         logger.error("Bad request: {}", ex.getMessage());
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.BAD_REQUEST) //mã lỗi 400
                 .body(BaseAPIRes.error(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
 
@@ -68,7 +86,7 @@ public class GlobalExceptionHandler {
             org.springframework.security.access.AccessDeniedException ex) {
         logger.error("Access denied: {}", ex.getMessage());
         return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
+                .status(HttpStatus.FORBIDDEN) //mã lỗi 403
                 .body(BaseAPIRes.error(HttpStatus.FORBIDDEN.value(),
                         "You do not have permission to perform this action"));
     }
@@ -83,8 +101,31 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseAPIRes<?>> handleBadCredentials(BadCredentialsException ex) {
         logger.error("Bad credentials: {}", ex.getMessage());
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.UNAUTHORIZED) //mã lỗi 401
                 .body(BaseAPIRes.error(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
     }
 
+    /**
+     * Handles lỗi validation (Bean Validation trong DTO).
+     *
+     * @param ex MethodArgumentNotValidException
+     * @return ResponseEntity với message chung và chi tiết lỗi từng field
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseAPIRes<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), error.getDefaultMessage());
+        });
+
+        logger.warn("Validation failed: {}", errors);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(BaseAPIRes.error(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Register failed due to validation errors",
+                        errors
+                ));
+    }
 }
