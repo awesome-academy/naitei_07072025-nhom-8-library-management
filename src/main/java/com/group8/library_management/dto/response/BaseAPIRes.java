@@ -58,6 +58,20 @@ public class BaseAPIRes<T> {
     }
 
     /**
+     * Trả về lỗi với code + message + chi tiết response
+     * @param code Mã HTTP
+     * @param message Thông điệp lỗi
+     * @param response Dữ liệu trả về
+     */
+    public static <T> BaseAPIRes<T> error(int code, String message, T response) {
+        return BaseAPIRes.<T>builder()
+                .code(code)
+                .message(message)
+                .response(response)
+                .build();
+    }
+
+    /**
      * Trả về lỗi với HttpStatus của Spring
      */
     public static <T> BaseAPIRes<T> error(HttpStatus status, String message) {
