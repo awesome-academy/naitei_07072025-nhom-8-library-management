@@ -1,10 +1,10 @@
 package com.group8.library_management.dto.request;
 
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import jakarta.validation.constraints.*;
 
 @Getter
 @Setter
@@ -12,29 +12,29 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class RegisterUserRequestDto {
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 20, message = "Username must be 3-20 characters long")
-    @Pattern(regexp = "^[A-Za-z0-9_]+$", message = "Username can only contain letters, digits, or underscores")
+    @NotBlank(message = "{username.notblank}")
+    @Size(min = 3, max = 20, message = "{username.size}")
+    @Pattern(regexp = "^[A-Za-z0-9_]+$", message = "{username.pattern}")
     private String username;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "{email.notblank}")
+    @Email(message = "{email.invalid}")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "{password.notblank}")
     @Pattern(
             regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$",
-            message = "Password must be at least 8 characters long, contain uppercase, lowercase, number, and special character"
+            message = "{password.pattern}"
     )
     private String password;
 
-    @NotBlank(message = "Full name is required")
+    @NotBlank(message = "{fullname.notblank}")
     private String fullName;
 
-    @NotBlank(message = "Phone is required")
+    @NotBlank(message = "{phone.notblank}")
     @Pattern(
             regexp = "^(03|05|07|08|09)\\d{8}$",
-            message = "Invalid phone number format (must be 10 digits, starting with 03, 05, 07, 08, or 09)"
+            message = "{phone.pattern}"
     )
     private String phone;
 }
