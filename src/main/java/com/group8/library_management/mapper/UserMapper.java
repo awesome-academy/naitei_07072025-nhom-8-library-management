@@ -1,9 +1,18 @@
 package com.group8.library_management.mapper;
+import com.group8.library_management.dto.request.LoginUserRequestDto;
 import com.group8.library_management.dto.request.RegisterUserRequestDto;
 import com.group8.library_management.entity.User;
 import com.group8.library_management.enums.Role;
 
 public class UserMapper {
+    public static User toEntity(LoginUserRequestDto dto) {
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword());
+        return user;
+    }
+
+
     public static User toEntity(RegisterUserRequestDto dto) {
         return User.builder()
                 .username(dto.getUsername())
