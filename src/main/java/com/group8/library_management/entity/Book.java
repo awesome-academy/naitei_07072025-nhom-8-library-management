@@ -57,4 +57,7 @@ public class Book {
     @ColumnDefault("0")
     @Column(name = "available_quantity", nullable = false)
     private Integer availableQuantity;
+
+    @Column(name = "deleted_at", nullable = true, updatable = true)
+    private LocalDateTime deletedAt;
 }

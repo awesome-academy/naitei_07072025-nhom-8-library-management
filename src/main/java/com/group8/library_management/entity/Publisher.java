@@ -30,4 +30,7 @@ public class Publisher {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "deleted_at", nullable = true, updatable = true)
+    private LocalDateTime deletedAt;
 }

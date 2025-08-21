@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
@@ -23,4 +25,11 @@ public class Genre {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "parent_id")
     private Genre parent;
+
+    @Column(name = "deleted_at", nullable = true, updatable = true)
+    private LocalDateTime deletedAt;
+
+    // thuộc tính không lưu vào dữ liệu để kiểm tra có con hay không
+    @Transient
+    private boolean hasChildren;
 }
