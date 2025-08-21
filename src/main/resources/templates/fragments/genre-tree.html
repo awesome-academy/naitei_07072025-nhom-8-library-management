@@ -1,0 +1,40 @@
+<th:block th:fragment="genreItems(children)">
+    <li th:each="child : ${children}"
+        th:class="${child.hasChildren} ? 'has-children collapsed' : 'no-children'"
+        th:attr="data-genre-id=${child.id}">
+        <div class="tree-node">
+            <span>
+                <span class="toggle" th:if="${child.hasChildren}" role="button" tabindex="0"
+                      aria-label="Toggle children"></span>
+                <span class="name" th:text="${child.name}"></span>
+            </span>
+            <span class="action-buttons">
+                <div class="btn-group">
+                    <button type="button"
+                            class="btn btn-sm edit-btn"
+                            th:attr="data-id=${child.id},data-name=${child.name},data-parent=${child.parent?.id}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editGenreModal"
+                            th:title="#{genre.edit.title}">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm delete-btn"
+                            th:attr="data-id=${child.id},data-name=${child.name}"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteGenreModal"
+                            th:title="#{genre.delete.title}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </span>
+        </div>
+
+        <!-- Recursive children -->
+        <ul th:if="${child.hasChildren}"
+            th:with="grandChildren=${@genreServiceImpl.getChildGenres(child.id)}"
+            class="hidden">
+            <th:block th:replace="~{fragments/genre-tree :: genreItems(children=${grandChildren})}" />
+        </ul>
+    </li>
+</th:block>

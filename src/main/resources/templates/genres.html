@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout}">
+<head>
+    <title th:text="#{genre.manage.title}">Manage Genres - Library Management</title>
+    <link rel="stylesheet" th:href="@{/css/management.css}">
+    <link rel="stylesheet" th:href="@{/css/genres.css}">
+</head>
+<body>
+<div layout:fragment="content" class="management-container">
+    <div class="card">
+        <div class="card-header">
+            <span>
+                <i class="bi bi-tags"></i>
+                <span th:text="#{genre.list.title}"> Genres List </span>
+                <span th:if="${totalElements}" class="badge badge-primary ms-2"
+                      th:text="${totalElements} + ' ' + #{genre.list.total}">0 total</span>
+            </span>
+            <div>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#addGenreModal" th:text="#{genre.add.new}">Add New Genre
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <input type="text" id="genreSearch" class="form-control" th:placeholder="#{genre.search.placeholder}"/>
+            </div>
+            <!-- Tree View -->
+            <div class="tree-view">
+                <ul>
+                    <li th:each="genre : ${topLevelGenres}"
+                        th:class="${genre.hasChildren} ? 'has-children collapsed' : 'no-children'"
+                        th:attr="data-genre-id=${genre.id}">
+                        <div class="tree-node">
+                         <span>
+                             <span class="toggle" th:if="${genre.hasChildren}" role="button" tabindex="0"
+                                   aria-label="Toggle children"></span>
+                             <span class="name" th:text="${genre.name}"></span>
+                        </span>
+                            <span class="action-buttons">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm edit-btn"
+                                            th:attr="data-id=${genre.id},data-name=${genre.name},data-parent=${genre.parent?.id}"
+                                            data-bs-toggle="modal" data-bs-target="#editGenreModal"
+                                            th:title="#{genre.edit.title}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm delete-btn"
+                                            th:attr="data-id=${genre.id},data-name=${genre.name}"
+                                            data-bs-toggle="modal" data-bs-target="#deleteGenreModal"
+                                            th:title="#{genre.delete.title}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </span>
+                        </div>
+
+                        <ul th:if="${genre.hasChildren}"
+                            th:with="children=${@genreServiceImpl.getChildGenres(genre.id)}"
+                            class="hidden">
+                            <th:block th:replace="~{fragments/genre-tree :: genreItems(children=${children})}"/>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div th:if="${#lists.isEmpty(topLevelGenres)}" class="text-center" th:text="#{genre.list.empty}">
+                    No genres found
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Genre -->
+    <div class="modal fade" id="addGenreModal" tabindex="-1" aria-labelledby="addGenreModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGenreModalLabel" th:text="#{genre.add.new}">Add New Genre</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addGenreForm" th:action="@{/admin/genres/create}" method="post">
+                        <div class="form-group">
+                            <label for="genreName" th:text="#{genre.name}">Genre Name</label>
+                            <input type="text" class="form-control" id="genreName" name="name"
+                                   th:placeholder="#{genre.name.placeholder}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="parentGenre" th:text="#{genre.parent}">Parent Genre (optional)</label>
+                            <select class="form-control" id="parentGenre" name="parentId">
+                                <option value="" th:text="#{genre.parent.none}">None</option>
+                                <option th:each="genre : ${allGenres}" th:value="${genre.id}"
+                                        th:text="${genre.name}"></option>
+                            </select>
+                        </div>
+                        <div id="formMessage" class="alert" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{modal.close}">Close</button>
+                    <button type="submit" class="btn btn-primary" form="addGenreForm" th:text="#{modal.save}">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Editing Genre -->
+    <div class="modal fade" id="editGenreModal" tabindex="-1" aria-labelledby="editGenreModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editGenreModalLabel" th:text="#{genre.edit.title}">Edit Genre</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editGenreForm" th:action="@{/admin/genres/{id}/edit(id=${editGenreId})}" method="post">
+                        <input type="hidden" id="editGenreId" name="id"/>
+                        <div class="form-group">
+                            <label for="editGenreName" th:text="#{genre.name}">Genre Name</label>
+                            <input type="text" class="form-control" id="editGenreName" name="name"
+                                   th:placeholder="#{genre.name.placeholder}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editParentGenre" th:text="#{genre.parent}">Parent Genre (optional)</label>
+                            <select class="form-control" id="editParentGenre" name="parentId">
+                                <option value="" th:text="#{genre.parent.none}">None</option>
+                                <option th:each="genre : ${allGenres}" th:value="${genre.id}"
+                                        th:text="${genre.name}"></option>
+                            </select>
+                        </div>
+                        <div id="editFormMessage" class="alert" style="display: none;"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{modal.close}">Close</button>
+                    <button type="submit" class="btn btn-primary" form="editGenreForm" th:text="#{modal.save}">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteGenreModal" tabindex="-1" aria-labelledby="deleteGenreModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteGenreModalLabel" th:text="#{modal.confirm}">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span>
+                    <p th:text="#{genre.delete.confirm}">Are you sure you want to delete genre <strong id="genreNameToDelete"></strong>?</p>
+                        </span>
+                    <div class="alert alert-warning" th:text="#{genre.delete.warning}">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        This action cannot be undone. All books associated with this genre will be affected.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{modal.cancel}">Cancel</button>
+                    <form id="deleteGenreForm" th:action="@{/admin/genres/{id}/delete(id=${genreIdToDelete})}" method="post">
+                        <input type="hidden" id="genreIdToDelete" name="id"/>
+                        <button type="submit" class="btn btn-danger" >
+                            <i class="bi bi-trash"></i>
+                            <span th:text="#{modal.delete}"> Delete Genre</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash message elements -->
+    <div th:if="${successMessage}"
+         th:attr="data-success-message=${successMessage}"
+         style="display: none;"></div>
+    <div th:if="${errorMessage}"
+         th:attr="data-error-message=${errorMessage}"
+         style="display: none;"></div>
+
+    <!-- Toast container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastBody" th:text="#{toast.success}">Success!</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for tree view toggle, search, and form submission -->
+<div layout:fragment="scripts">
+    <script th:src="@{/js/genre.js}"></script>
+    <script th:src="@{/js/toast.js}"></script>
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Library Management</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons-1.13.1/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row m-0">
+        <div class="col-auto p-0">
+            <nav class="sidebar">
+                <div class="admin-info">
+                    <img th:src="${#authentication.principal.avatar} ?: '/images/default-avatar.jpg'" alt="Admin Avatar"
+                         class="admin-avatar">
+                    <div class="admin-details">
+                        <span class="admin-name" th:text="${#authentication.principal.fullName} ?: 'Admin'"></span>
+                        <span class="admin-role">Admin</span>
+                    </div>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI() == '/admin/dashboard' ? 'active' : ''}"
+                       th:href="@{/admin/dashboard(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.dashboard}">Dashboard</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/books') ? 'active' : ''}"
+                       th:href="@{/admin/books(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-book"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.books}">Books</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/authors') ? 'active' : ''}"
+                       th:href="@{/admin/authors(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-person-lines-fill"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.authors}">Authors</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/publishers') ? 'active' : ''}"
+                       th:href="@{/admin/publishers(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-building"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.publishers}">Publishers</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/users') ? 'active' : ''}"
+                       th:href="@{/admin/users(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-people"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.users}">Users</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/borrow-requests') ? 'active' : ''}"
+                       th:href="@{/admin/borrow-requests(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-journal-check"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.borrowRequests}">Borrow Requests</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/genres') ? 'active' : ''}"
+                       th:href="@{/admin/genres(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-tags"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.genres}">Genres</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/copies') ? 'active' : ''}"
+                       th:href="@{/admin/copies(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-files"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.copies}">Copies</span>
+                    </a>
+                    <a class="nav-link"
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/settings') ? 'active' : ''}"
+                       th:href="@{/admin/settings(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-gear"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.settings}">Settings</span>
+                    </a>
+                </nav>
+                <div class="language-switcher">
+                    <div class="lang-toggle">
+                        <a th:href="@{${request != null ? request.getRequestURI() : '/admin/dashboard'}(lang='en')}"
+                           class="btn-lang" th:classappend="${param.lang == 'en' ? 'active' : ''}">
+                            <span class="d-none d-sm-inline" th:text="#{lang.english}">English</span>
+                        </a>
+                        <a th:href="@{${request != null ? request.getRequestURI() : '/admin/dashboard'}(lang='vi')}"
+                           class="btn-lang" th:classappend="${param.lang == 'vi' ? 'active' : ''}">
+                            <span class="d-none d-sm-inline" th:text="#{lang.vietnamese}">Tiếng Việt</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="col p-0">
+            <div class="main-content" layout:fragment="content">
+                <!-- Content will be injected here -->
+            </div>
+            <div layout:fragment="scripts"></div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
