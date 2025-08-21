@@ -1,5 +1,6 @@
 package com.group8.library_management.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -22,6 +23,8 @@ import java.util.List;
 public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Value("${api.version}")
+    private String apiVersion;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -37,14 +40,17 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+        String authPath = "/api/" + apiVersion + "/auth/**";
+        String apiPath = "/api/" + apiVersion + "/**";
+
         http
-                .securityMatcher("/auth/**", "/user/**") // chỉ áp dụng cho API
+                .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers(authPath).permitAll()
+                        .requestMatchers(apiPath).hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)
@@ -62,7 +68,14 @@ public class SecurityConfig {
         http
                 .securityMatcher("/admin/**")
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/login").permitAll() // cho phép login page không cần auth
+                        .requestMatchers(
+                                "/admin/login",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/vendor/**",
+                                "/webfonts/**"
+                        ).permitAll()// cho phép login page không cần auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                 )
                 .formLogin(form -> form
