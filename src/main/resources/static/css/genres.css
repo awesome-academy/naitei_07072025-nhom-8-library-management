@@ -1,0 +1,293 @@
+/* Tree view styles with smooth animations */
+.tree-view {
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.tree-view ul {
+    list-style: none;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.tree-view li {
+    position: relative;
+    padding: 2px 0;
+    overflow: hidden;
+}
+
+.tree-view .tree-node {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.tree-view .tree-node:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transform: translateX(2px);
+}
+
+/* Toggle button styles */
+.tree-view .toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    user-select: none;
+}
+
+.tree-view .toggle:hover {
+    background-color: #e9ecef;
+    transform: scale(1.1);
+}
+
+.tree-view .toggle:active {
+    transform: scale(0.95);
+}
+
+.tree-view .toggle::before {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+.tree-view .no-children .toggle::before {
+    content: "\2022"; /* Bullet for leaf nodes */
+    color: #6c757d;
+    font-size: 0.6rem;
+}
+
+.tree-view .has-children .toggle::before {
+    content: "\25BC"; /* ▼ */
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #495057;
+}
+
+.tree-view .has-children.collapsed .toggle::before {
+    transform: rotate(-90deg); /* Rotate left when collapsed */
+    color: #6c757d;
+}
+
+/* Smooth collapsing animation */
+.tree-view ul {
+    max-height: 1000px; /* Large enough for all nodes */
+    overflow: hidden;
+    opacity: 1;
+    transform-origin: top;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.tree-view ul.collapsing {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.tree-view ul.hidden {
+    max-height: 0;
+    opacity: 0;
+}
+
+.tree-view ul:not(.hidden) {
+    max-height: 1000px;
+    opacity: 1;
+    transform: scaleY(1);
+}
+
+/* Action buttons */
+.tree-view .action-buttons {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    gap: 4px;
+}
+
+.tree-view .tree-node:hover .action-buttons {
+    opacity: 1;
+}
+
+.tree-view .action-buttons .btn-group {
+    display: flex;
+    gap: 6px;
+}
+
+.tree-view .action-buttons .btn {
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.tree-view .action-buttons .btn i {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.tree-view .action-buttons .edit-btn {
+    background: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.tree-view .action-buttons .edit-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.tree-view .action-buttons .delete-btn {
+    background: #f56565;
+    box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+}
+
+.tree-view .action-buttons .delete-btn:hover {
+    background: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+}
+
+/* Node name styling */
+.tree-view .name {
+    font-weight: 500;
+    color: #495057;
+    transition: color 0.2s ease;
+}
+
+.tree-view .tree-node:hover .name {
+    color: #212529;
+}
+
+/* Search bar */
+.search-bar {
+    margin-bottom: 20px;
+}
+
+.search-bar .form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+}
+
+.search-bar .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Highlight matching search results */
+.tree-view li.search-match .name {
+    background: linear-gradient(120deg, #667eea20 0%, transparent 100%);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Loading state */
+.tree-view li.loading .toggle::before {
+    content: "\21BB";
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tree-view ul {
+        padding-left: 15px;
+    }
+
+    .tree-view .tree-node {
+        padding: 6px 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .tree-view .action-buttons {
+        opacity: 1;
+        align-self: flex-end;
+    }
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.alert {
+    margin-top: 15px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+}

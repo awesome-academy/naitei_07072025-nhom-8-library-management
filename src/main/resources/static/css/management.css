@@ -1,0 +1,57 @@
+/* General styles for management pages */
+.management-container {
+    padding: 20px;
+}
+
+.card {
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-responsive {
+    margin-top: 10px;
+}
+
+.btn-sm {
+    font-size: 0.85rem;
+}
+
+/* Ensure consistent table styling */
+.table th, .table td {
+    vertical-align: middle;
+}
+
+/* Style for action buttons */
+.action-buttons a {
+    margin-right: 5px;
+}
+
+/* Ensure cards in overview-row (if used) have equal height */
+.overview-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.overview-row .col-md-3 {
+    display: flex;
+}
+
+.overview-row .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.overview-row .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
