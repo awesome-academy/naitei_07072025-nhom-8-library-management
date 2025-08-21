@@ -1,11 +1,21 @@
 package com.group8.library_management.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -33,4 +43,6 @@ public class Author {
 
     @Column(name = "deleted_at", nullable = true, updatable = true)
     private LocalDateTime deletedAt;
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private List<Book> books;
 }
