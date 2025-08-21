@@ -65,17 +65,25 @@
                         <span class="d-none d-sm-inline" th:text="#{sidebar.genres}">Genres</span>
                     </a>
                     <a class="nav-link"
-                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/copies') ? 'active' : ''}"
-                       th:href="@{/admin/copies(lang=${param.lang != null ? param.lang : 'en'})}">
-                        <i class="bi bi-files"></i>
-                        <span class="d-none d-sm-inline" th:text="#{sidebar.copies}">Copies</span>
+                       th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/statistics') ? 'active' : ''}"
+                       th:href="@{/admin/statistics(lang=${param.lang != null ? param.lang : 'en'})}">
+                        <i class="bi bi-file-bar-graph"></i>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.settings}">Settings</span>
                     </a>
                     <a class="nav-link"
                        th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/settings') ? 'active' : ''}"
                        th:href="@{/admin/settings(lang=${param.lang != null ? param.lang : 'en'})}">
                         <i class="bi bi-gear"></i>
-                        <span class="d-none d-sm-inline" th:text="#{sidebar.settings}">Settings</span>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.statistics}">statistics</span>
                     </a>
+
+                    <form th:action="@{/admin/logout}" method="post" style="display: contents;">
+                        <a class="nav-link" href="#" onclick="this.closest('form').submit();">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-sm-inline" th:text="#{sidebar.logout}">Logout</span>
+                        </a>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    </form>
                 </nav>
                 <div class="language-switcher">
                     <div class="lang-toggle">

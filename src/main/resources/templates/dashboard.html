@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/layout}">
+<head>
+    <title th:text="#{dashboard.title}">Dashboard - Library Management</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Welcome Section -->
+    <div class="welcome-section mb-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="welcome-card">
+                    <div class="welcome-content">
+                        <h1 class="welcome-title">
+                            <span th:text="#{dashboard.welcome}">Welcome back,</span>
+                            <span th:text="${#authentication.principal.fullName} ?: 'Admin'">Admin</span>!
+                        </h1>
+                        <p class="welcome-subtitle" th:text="#{dashboard.subtitle}">
+                            Here's what's happening in your library today
+                        </p>
+                    </div>
+                    <div class="welcome-stats">
+                        <div class="stat-item">
+                            <i class="bi bi-calendar3"></i>
+                            <span th:text="${#temporals.format(#temporals.createNow(), 'EEEE, dd MMMM yyyy')}">Today's Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Summary -->
+    <div class="row overview-row mb-5">
+        <div class="metric-card books-metric">
+            <div class="metric-icon"><i class="bi bi-book-fill"></i></div>
+            <div class="metric-info">
+                <div class="metric-number" th:text="${totalBooks}">0</div>
+                <div class="metric-label" th:text="#{dashboard.totalBooks}">Total Books</div>
+            </div>
+        </div>
+        <div class="metric-card borrowed-metric">
+            <div class="metric-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+            <div class="metric-info">
+                <div class="metric-number" th:text="${activeBorrows}">0</div>
+                <div class="metric-label" th:text="#{dashboard.booksBorrowed}">Books Borrowed</div>
+            </div>
+        </div>
+        <div class="metric-card requests-metric">
+            <div class="metric-icon"><i class="bi bi-clock-fill"></i></div>
+            <div class="metric-info">
+                <div class="metric-number" th:text="${pendingRequests}">0</div>
+                <div class="metric-label" th:text="#{dashboard.pendingRequests}">Pending Requests</div>
+            </div>
+        </div>
+        <div class="metric-card overdue-metric">
+            <div class="metric-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div class="metric-info">
+                <div class="metric-number" th:text="${dueSoonRecords}">0</div>
+                <div class="metric-label" th:text="#{dashboard.dueSoon}">Due Soon</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="quick-actions-card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        <span th:text="#{dashboard.quickActions}">Quick Actions</span>
+                    </h4>
+                    <p class="text-muted mb-0" th:text="#{dashboard.quickActions.subtitle}">
+                        Frequently used management tools
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a th:href="@{/admin/books}" class="action-btn">
+                                <div class="action-icon add-book"><i class="bi bi-plus-circle-fill"></i></div>
+                                <div class="action-content">
+                                    <h6 th:text="#{dashboard.addBook}">Add New Book</h6>
+                                    <p th:text="#{dashboard.addBook.desc}">Add a new book to the library</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a th:href="@{/admin/users}" class="action-btn">
+                                <div class="action-icon manage-users"><i class="bi bi-people-fill"></i></div>
+                                <div class="action-content">
+                                    <h6 th:text="#{dashboard.manageUsers}">Manage Users</h6>
+                                    <p th:text="#{dashboard.manageUsers.desc}">View and manage library members</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a th:href="@{/admin/borrow-requests}" class="action-btn">
+                                <div class="action-icon process-requests"><i class="bi bi-check2-square"></i></div>
+                                <div class="action-content">
+                                    <h6 th:text="#{dashboard.processRequests}">Process Requests</h6>
+                                    <p th:text="#{dashboard.processRequests.desc}">Review borrow requests</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a th:href="@{/admin/statistics}" class="action-btn">
+                                <div class="action-icon generate-reports"><i class="bi bi-graph-up"></i></div>
+                                <div class="action-content">
+                                    <h6 th:text="#{dashboard.viewReports}">View Reports</h6>
+                                    <p th:text="#{dashboard.viewReports.desc}">Generate library statistics</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Books Due Soon -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="due-soon-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            <i class="bi bi-alarm-fill me-2"></i>
+                            <span th:text="#{dashboard.booksDueSoon}">Books Due Soon</span>
+                        </h5>
+                        <p class="text-muted mb-0 mt-1" th:text="#{dashboard.booksDueSoon.subtitle}">
+                            Books with upcoming due dates
+                        </p>
+                    </div>
+                    <a th:href="@{/admin/overdue-books}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-list-check"></i> <span th:text="#{dashboard.viewAllOverdue}">View All Overdue</span>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(dueSoonBooks)}" class="text-center py-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3 text-muted" th:text="#{dashboard.noBooksDue}">No books due soon</h6>
+                        <p class="text-muted mb-0" th:text="#{dashboard.noBooksDue.desc}">
+                            All borrowed books have comfortable due dates
+                        </p>
+                    </div>
+
+                    <!-- Hiển thị tối đa 3 sách -->
+                    <div th:each="book, iterStat : ${dueSoonBooks}"
+                         th:if="${iterStat.index < 3}"
+                         class="due-book-item">
+                        <div class="book-info">
+                            <div class="book-details">
+                                <h6 class="book-title" th:text="${book.bookTitle()}">Book Title</h6>
+                                <p class="book-borrower">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    <span th:text="${book.fullName()}">John Doe</span>
+                                </p>
+                            </div>
+                            <div class="due-info">
+                                <div class="due-date"
+                                     th:classappend="${book.isOverdue} ? 'overdue' : (${book.daysUntilDue <= 1} ? 'critical' : 'warning')">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    <span th:text="${#temporals.format(book.dueDate, 'dd/MM/yyyy')}">25/12/2024</span>
+                                </div>
+                                <div class="due-status">
+                                    <span th:if="${book.isOverdue}" class="badge badge-danger">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                        <span th:text="#{dashboard.overdue}">Overdue</span>
+                                    </span>
+                                    <span th:unless="${book.isOverdue}"
+                                          th:classappend="${book.daysUntilDue <= 1} ? 'badge-danger' : (${book.daysUntilDue <= 3} ? 'badge-warning' : 'badge-info')"
+                                          class="badge">
+                                        <span th:text="${book.daysUntilDue + ' ' + #messages.msg('dashboard.daysLeft')}">2 days left</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="book-actions">
+                            <a th:href="@{/admin/copies/extend/{id}(id=${book.copyId})}"
+                               class="btn btn-sm btn-outline-primary"
+                               th:title="#{dashboard.extendDue}">
+                                <i class="bi bi-calendar-plus"></i>
+                            </a>
+                            <a th:href="@{/admin/copies/return/{id}(id=${book.copyId})}"
+                               class="btn btn-sm btn-outline-success"
+                               th:title="#{dashboard.markReturned}">
+                                <i class="bi bi-check-circle"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-6 mb-4">
+            <div class="activity-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-activity me-2"></i>
+                        <span th:text="#{dashboard.recentActivity}">Recent Activity</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-item">
+                        <div class="activity-icon book-added"><i class="bi bi-plus-circle"></i></div>
+                        <div class="activity-info">
+                            <h6 th:text="#{dashboard.activity.newBook}">New book added</h6>
+                            <p class="text-muted">2 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon request-approved"><i class="bi bi-check-circle"></i></div>
+                        <div class="activity-info">
+                            <h6 th:text="#{dashboard.activity.requestApproved}">Borrow request approved</h6>
+                            <p class="text-muted">4 hours ago</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon user-registered"><i class="bi bi-person-plus"></i></div>
+                        <div class="activity-info">
+                            <h6 th:text="#{dashboard.activity.userRegistered}">New user registered</h6>
+                            <p class="text-muted">1 day ago</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon book-returned"><i class="bi bi-arrow-return-left"></i></div>
+                        <div class="activity-info">
+                            <h6 th:text="#{dashboard.activity.bookReturned}">Book returned</h6>
+                            <p class="text-muted">2 days ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -45,4 +45,9 @@ public class BookServiceImpl implements BookService {
                 bookPage.getTotalPages()
         );
     }
+
+    @Override
+    public long countBooks() {
+        return bookRepository.count();
+    }
 }
