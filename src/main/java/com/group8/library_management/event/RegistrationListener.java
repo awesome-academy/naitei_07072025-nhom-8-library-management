@@ -25,6 +25,9 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     @Value("${app.verification.url}")
     private String verificationUrl;
 
+    @Value("${api.version}")
+    private String apiVersion;
+
     private final VerificationService verificationService;
     private final EmailService emailService;
 
@@ -48,9 +51,9 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
 
         String recipientAddress = user.getEmail();
         String subject = "Email Verification";
-        String confirmationUrl = verificationUrl + token;
+        String confirmationUrl = verificationUrl + "/api/" + apiVersion + "/auth/verify-email?token=" + token;
 
-        // get locale from request, default EN
+        // Lấy locale từ request hiện tại, mặc định EN nếu không có
         Locale locale = LocaleContextHolder.getLocale();
 
         try {

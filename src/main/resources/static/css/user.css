@@ -1,0 +1,215 @@
+/* user.css */
+
+/*
+   The styles below are copied from the author management CSS
+   to ensure a consistent look and feel across all management pages.
+*/
+
+/* Styles for enhanced features from management.css */
+.management-container {
+    padding: 20px;
+}
+
+.search-filter-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 25px rgba(102, 126, 234, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.search-row {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.search-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group {
+    min-width: 150px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(102, 126, 234, 0.08);
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.pagination {
+    margin: 0;
+}
+
+.page-size-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.bulk-actions {
+    display: none;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bulk-actions.show {
+    display: flex;
+}
+
+.select-all-checkbox {
+    margin-right: 0.5rem;
+}
+
+.row-checkbox {
+    margin-right: 0.5rem;
+}
+
+/* Action buttons */
+.action-buttons .btn-group {
+    display: flex;
+    gap: 6px;
+}
+
+.action-buttons .btn {
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.action-buttons .btn i {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.action-buttons .deactivate-btn {
+    background: #f56565;
+    box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+}
+
+.action-buttons .deactivate-btn:hover {
+    background: #e53e3e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+}
+
+.action-buttons .reactivate-btn {
+    background: #48bb78;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.action-buttons .reactivate-btn:hover {
+    background: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+}
+
+.action-buttons .view-btn {
+    background: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.action-buttons .view-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .search-row {
+        flex-direction: column;
+    }
+
+    .search-group, .filter-group {
+        min-width: 100%;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Base styles from management.css */
+.card {
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 25px rgba(102, 126, 234, 0.08);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    background-color: #f7f9fc;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 1rem 1.5rem;
+}
+
+.table-responsive {
+    margin-top: 10px;
+}
+
+.btn-sm {
+    font-size: 0.85rem;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}

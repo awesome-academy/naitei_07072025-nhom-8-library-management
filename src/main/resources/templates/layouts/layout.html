@@ -68,13 +68,13 @@
                        th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/statistics') ? 'active' : ''}"
                        th:href="@{/admin/statistics(lang=${param.lang != null ? param.lang : 'en'})}">
                         <i class="bi bi-file-bar-graph"></i>
-                        <span class="d-none d-sm-inline" th:text="#{sidebar.settings}">Settings</span>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.statistics}">Statistics</span>
                     </a>
                     <a class="nav-link"
                        th:classappend="${request != null and request.getRequestURI() != null and request.getRequestURI().startsWith('/admin/settings') ? 'active' : ''}"
                        th:href="@{/admin/settings(lang=${param.lang != null ? param.lang : 'en'})}">
                         <i class="bi bi-gear"></i>
-                        <span class="d-none d-sm-inline" th:text="#{sidebar.statistics}">statistics</span>
+                        <span class="d-none d-sm-inline" th:text="#{sidebar.settings}">Settings</span>
                     </a>
 
                     <form th:action="@{/admin/logout}" method="post" style="display: contents;">
@@ -101,7 +101,6 @@
         </div>
         <div class="col p-0">
             <div class="main-content" layout:fragment="content">
-                <!-- Content will be injected here -->
             </div>
             <div layout:fragment="scripts"></div>
         </div>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/layout}">
+<head>
+    <title th:text="#{user.title}">Manage Users - Library Management</title>
+    <link rel="stylesheet" th:href="@{/css/management.css}">
+    <link rel="stylesheet" th:href="@{/css/user.css}">
+</head>
+<body>
+<div layout:fragment="content" class="management-container">
+
+    <div class="search-filter-container">
+        <form th:action="@{/admin/users}" method="get" class="search-form">
+            <div class="search-row">
+                <div class="search-group">
+                    <label for="searchName" class="form-label" th:text="#{user.search.name.label}">Search by Name</label>
+                    <div class="input-group">
+                        <input type="text" id="searchName" name="searchName"
+                               th:value="${searchName}"
+                               class="form-control"
+                               th:placeholder="#{user.search.name.placeholder}">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortBy" class="form-label" th:text="#{user.filter.sortBy.label}">Sort By</label>
+                    <select id="sortBy" name="sortBy" class="form-control">
+                        <option value="fullName" th:selected="${sortBy == 'fullName'}" th:text="#{user.sort.name.asc}">Full Name (A-Z)</option>
+                        <option value="fullName,desc" th:selected="${sortBy == 'fullName,desc'}" th:text="#{user.sort.name.desc}">Full Name (Z-A)</option>
+                        <option value="id" th:selected="${sortBy == 'id'}" th:text="#{user.sort.id.asc}">ID (Low to High)</option>
+                        <option value="id,desc" th:selected="${sortBy == 'id,desc'}" th:text="#{user.sort.id.desc}">ID (High to Low)</option>
+                        <option value="activationDate,desc" th:selected="${sortBy == 'activationDate,desc'}" th:text="#{user.sort.active.newest}">Newest Active First</option>
+                        <option value="activationDate,asc" th:selected="${sortBy == 'activationDate,asc'}" th:text="#{user.sort.active.oldest}">Oldest Active First</option>
+                    </select>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-filter"></i> <span th:text="#{user.filter.apply}">Apply Filters</span>
+                    </button>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x"></i> <span th:text="#{user.filter.clear}">Clear</span>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span>
+                <i class="bi bi-people"></i> <span th:text="#{user.table.header.name}">Users List</span>
+                <span th:if="${totalElements}" class="badge badge-primary ms-2"
+                      th:text="${totalElements + ' ' + #messages.msg('user.table.total')}">0 total</span>
+            </span>
+            <div class="header-actions">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshTable()">
+                    <i class="bi bi-arrow-repeat"></i> <span th:text="#{user.table.refresh}">Refresh</span>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th style="width: 60px;" th:text="#{user.table.header.id}">ID</th>
+                        <th th:text="#{user.table.header.name}">Name</th>
+                        <th th:text="#{user.table.header.email}">Email</th>
+                        <th th:text="#{user.table.header.role}">Role</th>
+                        <th style="width: 140px;" th:text="#{user.table.header.activationDate}">Active Since</th>
+                        <th style="width: 120px;" th:text="#{user.table.header.actions}">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}" class="user-row">
+                        <td>
+                            <span class="badge badge-primary" th:text="${user.id}">1</span>
+                        </td>
+                        <td>
+                            <div class="user-name" th:text="${user.fullName}">User Full Name</div>
+                        </td>
+                        <td>
+                            <div th:text="${user.email}">user@example.com</div>
+                        </td>
+                        <td>
+                            <div th:text="${user.role}">user</div>
+                        </td>
+                        <td>
+                            <div th:if="${user.activationDate != null}">
+                                <small class="text-muted"
+                                       th:text="${#temporals.format(user.activationDate, 'dd/MM/yyyy')}">
+                                    01/01/2024
+                                </small>
+                                <br>
+                                <small class="text-muted"
+                                       th:text="${#temporals.format(user.activationDate, 'HH:mm')}">
+                                    10:30
+                                </small>
+                            </div>
+                            <div th:if="${user.activationDate == null}" class="text-danger">
+                                <i class="bi bi-x-circle-fill"></i> <span th:text="#{user.table.status.inactive}">Inactive</span>
+                            </div>
+                        </td>
+                        <td class="action-buttons">
+                            <div class="btn-group">
+
+                                <!-- Nút deactivate -->
+                                <button type="button"
+                                        class="btn btn-sm btn-danger deactivate-btn"
+                                        th:if="${user.activationDate != null and !#strings.equalsIgnoreCase(user.role, 'ADMIN')}"
+                                        th:data-id="${user.id}"
+                                        th:data-name="${user.fullName}"
+                                        data-action="deactivate"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#actionModal"
+                                        th:title="#{user.table.action.deactivate}">
+                                    <i class="bi bi-person-x-fill"></i>
+                                </button>
+
+                                <!-- Nút reactivate -->
+                                <button type="button"
+                                        class="btn btn-sm btn-success reactivate-btn"
+                                        th:if="${user.activationDate == null and !#strings.equalsIgnoreCase(user.role, 'ADMIN')}"
+                                        th:data-id="${user.id}"
+                                        th:data-name="${user.fullName}"
+                                        data-action="reactivate"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#actionModal"
+                                        th:title="#{user.table.action.reactivate}">
+                                    <i class="bi bi-person-check-fill"></i>
+                                </button>
+                                <a th:href="@{/admin/users/{id}/view(id=${user.id})}"
+                                   class="btn btn-sm view-btn"
+                                   th:title="#{user.table.action.view}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(users)}" class="empty-row">
+                        <td colspan="6">
+                            <div class="empty-state d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-person-slash mb-3"></i>
+                                <h4 th:text="#{user.empty.title}">No Users Found</h4>
+                                <p th:text="#{user.empty.message}" class="text-center">No users match your search criteria or none have been added yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="actionMessage"></p>
+                    <div class="alert alert-warning" id="actionWarning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="actionWarningText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{user.modal.close}">Cancel</button>
+                    <form id="actionForm" method="post" style="display: inline;">
+                        <input type="hidden" name="_method" id="httpMethod" value="put"/>
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn" id="submitActionButton">
+                            <i id="actionButtonIcon"></i> <span id="actionButtonText"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}"
+         th:attr="data-success-message=${successMessage}"
+         style="display: none;"></div>
+    <div th:if="${errorMessage}"
+         th:attr="data-error-message=${errorMessage}"
+         style="display: none;"></div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastBody"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination-container" th:if="${totalPages > 1}">
+        <div class="pagination-info">
+            <span th:text="#{user.pagination.showing}">Showing</span>
+            <span th:text="${(currentPage * size) + 1}">1</span> <span th:text="#{user.pagination.to}">to</span>
+            <span th:text="${(currentPage * size) + #lists.size(users)}">10</span> <span th:text="#{user.pagination.of}">of</span>
+            <span th:text="${totalElements}">100</span> <span th:text="#{user.pagination.users}">users</span>
+        </div>
+
+        <nav aria-label="Users pagination">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=0, size=${size}, searchName=${searchName}, sortBy=${sortBy})}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${currentPage - 1}, size=${size}, searchName=${searchName}, sortBy=${sortBy})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+
+                <li class="page-item"
+                    th:each="pageNum : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}"
+                    th:classappend="${pageNum == currentPage} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${pageNum}, size=${size}, searchName=${searchName}, sortBy=${sortBy})}"
+                       th:text="${pageNum + 1}">1</a>
+                </li>
+
+                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${currentPage + 1}, size=${size}, searchName=${searchName}, sortBy=${sortBy})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+
+                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${totalPages - 1}, size=${size}, searchName=${searchName}, sortBy=${sortBy})}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="page-size-selector">
+            <label for="pageSize" class="form-label" th:text="#{user.pagination.show}">Show:</label>
+            <select id="pageSize" name="size" class="form-control" style="width: auto;" onchange="changePageSize(this.value)">
+                <option value="5" th:selected="${size == 5}">5</option>
+                <option value="10" th:selected="${size == 10}">10</option>
+                <option value="25" th:selected="${size == 25}">25</option>
+                <option value="50" th:selected="${size == 50}">50</option>
+                <option value="100" th:selected="${size == 100}">100</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div layout:fragment="scripts">
+    <script th:src="@{/js/user.js}"></script>
+    <script th:src="@{/js/toast.js}"></script>
+    <script th:inline="javascript">
+        const messages = {
+            deactivateTitle: '[[#{user.modal.deactivate.title}]]',
+            deactivateConfirm: '[[#{user.modal.deactivate.confirm}]]',
+            deactivateWarning: '[[#{user.modal.deactivate.warning}]]',
+            deactivateButton: '[[#{user.modal.deactivate.button}]]',
+            reactivateTitle: '[[#{user.modal.reactivate.title}]]',
+            reactivateConfirm: '[[#{user.modal.reactivate.confirm}]]',
+            reactivateWarning: '[[#{user.modal.reactivate.warning}]]',
+            reactivateButton: '[[#{user.modal.reactivate.button}]]',
+            toastDeactivateSuccess: '[[#{user.toast.deactivate.success}]]',
+            toastDeactivateError: '[[#{user.toast.deactivate.error}]]',
+            toastReactivateSuccess: '[[#{user.toast.reactivate.success}]]',
+            toastReactivateError: '[[#{user.toast.reactivate.error}]]',
+        };
+    </script>
+</div>
+</body>
+</html>

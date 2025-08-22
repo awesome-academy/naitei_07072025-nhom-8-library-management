@@ -2,6 +2,7 @@ package com.group8.library_management.event;
 
 
 import com.group8.library_management.entity.User;
+import com.group8.library_management.repository.VerificationRepository;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
