@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,4 +34,7 @@ public class Publisher {
 
     @Column(name = "deleted_at", nullable = true, updatable = true)
     private LocalDateTime deletedAt;
+    @OneToMany(mappedBy = "publisher")
+    private List<Book> books;
+
 }
