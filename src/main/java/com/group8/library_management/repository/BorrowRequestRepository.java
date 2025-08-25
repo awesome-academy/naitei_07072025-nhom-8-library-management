@@ -4,6 +4,11 @@ import com.group8.library_management.entity.BorrowRequest;
 import com.group8.library_management.enums.BorrowRequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
+import java.util.List;
+
 public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Integer> {
     Long countAllByStatus(BorrowRequestStatus status);
+
+    List<BorrowRequest> findByUserIdAndStatusIn(Integer userId, List<BorrowRequestStatus> statuses);
 }

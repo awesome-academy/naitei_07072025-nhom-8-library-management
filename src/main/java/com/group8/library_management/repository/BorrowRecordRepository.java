@@ -31,9 +31,16 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Inte
         JOIN r.user u
         JOIN brd.copy c
         JOIN c.book b
-        WHERE br.returnedAt IS NULL 
-        AND br.dueDate <= :limitDate 
+        WHERE br.returnedAt IS NULL
+        AND br.dueDate <= :limitDate
         AND br.dueDate >= :currentDate
         """)
     List<DueSoonBookRes> findDueSoonBooks(@Param("currentDate") LocalDate currentDate, @Param("limitDate") LocalDate limitDate);
+
+
+    @Query("SELECT CASE WHEN COUNT(br) > 0 THEN true ELSE false END " +
+            "FROM BorrowRecord br " +
+            "WHERE br.borrowRequestDetail.borrowRequest.user.id = :userId " +
+            "AND br.status IN :statuses")
+    boolean existsByUserIdAndStatus(@Param("userId") Integer userId, @Param("statuses") List<BorrowRecordStatus> statuses);
 }

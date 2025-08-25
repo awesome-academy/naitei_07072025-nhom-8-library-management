@@ -1,3 +1,6 @@
+# ===============================
+# = Application Info
+# ===============================
 spring.application.name=library_management
 server.port=8080
 
@@ -29,11 +32,8 @@ spring.thymeleaf.cache=false
 # ===============================
 # = JWT Security
 # ===============================
-# Secret key for signing JWT tokens
-# Replace this with your own secret key
-security.jwt.secret-key=your_jwt_secret_key_here
-# Token expiration time in milliseconds (e.g., 1h)
-security.jwt.expiration-time=3600000
+security.jwt.secret-key=your_secret_key_here
+security.jwt.expiration-time=3600000  # 1 hour in milliseconds
 
 # ===============================
 # = Email Configuration
@@ -67,3 +67,12 @@ spring.messages.fallback-to-system-locale=true
 # = API Versioning
 # ===============================
 api.version=v1
+
+# ===============================
+# = Logging Configuration
+# ===============================
+logging.level.root=INFO
+logging.level.org.springframework.security=DEBUG
+logging.level.com.group8.library_management=DEBUG
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
