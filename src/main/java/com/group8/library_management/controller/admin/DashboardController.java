@@ -27,7 +27,7 @@ public class DashboardController {
         model.addAttribute("totalBooks", bookService.countBooks());
         model.addAttribute("activeBorrows", borrowRecordService.countBorrowingRecords());
         model.addAttribute("pendingRequests", borrowRequestService.countPendingBorrowRequests());
-        model.addAttribute("dueSoonRecords", borrowRecordService.coundDueSoonRecords());
+        model.addAttribute("dueSoonRecords", borrowRecordService.countDueSoonRecords());
         model.addAttribute("dueSoonBooks", borrowRecordService.getDueSoonBooks());
         model.addAttribute("request", request);
         return "dashboard";
