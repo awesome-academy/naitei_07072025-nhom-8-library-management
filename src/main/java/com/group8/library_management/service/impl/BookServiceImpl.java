@@ -50,4 +50,30 @@ public class BookServiceImpl implements BookService {
     public long countBooks() {
         return bookRepository.count();
     }
+
+    @Override
+    public PageRes<BookDetailRes> getAllBooks(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findAll(pageable);
+
+        List<BookDetailRes> bookDtos = bookPage.getContent()
+                .stream()
+                .map(BookMapper::toDto)
+                .toList();
+
+        return new PageRes<>(
+                bookDtos,
+                page,
+                size,
+                bookPage.getTotalElements(),
+                bookPage.getTotalPages()
+        );
+    }
+
+    @Override
+    public BookDetailRes getBookById(Integer id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("book.not_found"));
+        return BookMapper.toDto(book);
+    }
 }
