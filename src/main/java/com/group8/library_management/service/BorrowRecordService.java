@@ -11,11 +11,12 @@ public interface BorrowRecordService {
     long countBorrowingRecords();
     long countOverdueRecords();
     List<DueSoonBookRes> getDueSoonBooks();
-
+    boolean hasUserBorrowedBook(String username, Integer bookId);
     PageRes<BorrowHistoryResponse> getBorrowHistoryByUserId(
             Integer userId,
             int page,
             int size,
             String sortDir
     );
+
 }
