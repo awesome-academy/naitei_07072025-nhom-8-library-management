@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Locale;
 
 @RestController
-@RequestMapping("/v1/books")
+@RequestMapping("/api/${api.version}/books")
 @RequiredArgsConstructor
 public class BookController {
 
@@ -34,6 +34,30 @@ public class BookController {
 
         return ResponseEntity.ok(
                 BaseAPIRes.success(HttpStatusCode.OK, message, result)
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<BaseAPIRes<?>> getAllBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Locale locale
+    ) {
+        PageRes<BookDetailRes> booksPage = bookService.getAllBooks(page, size);
+        String message = messageSource.getMessage("book.list.success", null, locale);
+
+        return ResponseEntity.ok(
+                BaseAPIRes.success(HttpStatus.OK.value(), message, booksPage)
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BaseAPIRes<?>> getBookById(@PathVariable Integer id, Locale locale) {
+        BookDetailRes bookDetail = bookService.getBookById(id);
+        String message = messageSource.getMessage("book.detail.success", null, locale);
+
+        return ResponseEntity.ok(
+                BaseAPIRes.success(HttpStatus.OK.value(), message, bookDetail)
         );
     }
 }
