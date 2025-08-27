@@ -1,4 +1,5 @@
 package com.group8.library_management.service;
+import com.group8.library_management.dto.response.UserProfileRes;
 import com.group8.library_management.entity.User;
 
 import org.springframework.data.domain.Page;
@@ -12,4 +13,7 @@ public interface UserService {
     Optional<User> getUserById(Integer id);
     void deactivateUser(Integer id);
     void reactivateUser(Integer id);
+
+    //user
+    UserProfileRes getUserProfile();
 }

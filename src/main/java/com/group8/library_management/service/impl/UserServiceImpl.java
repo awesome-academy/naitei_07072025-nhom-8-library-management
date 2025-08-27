@@ -1,5 +1,6 @@
 package com.group8.library_management.service.impl;
 
+import com.group8.library_management.dto.response.UserProfileRes;
 import com.group8.library_management.entity.BorrowRequest;
 import com.group8.library_management.entity.BorrowRequestDetail;
 import com.group8.library_management.entity.User;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import java.time.LocalDateTime;
@@ -124,4 +127,26 @@ public class UserServiceImpl implements UserService {
         userRepository.save(reactivatedUser);
     }
 
+    //User
+    private String getCurrentUsername() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return (principal instanceof UserDetails)
+                ? ((UserDetails) principal).getUsername()
+                : principal.toString();
+    }
+
+    @Override
+    public UserProfileRes getUserProfile() {
+        String username = getCurrentUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("user.not_found"));
+
+        return UserProfileRes.builder()
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatar(user.getAvatar())
+                .build();
+    }
 }
