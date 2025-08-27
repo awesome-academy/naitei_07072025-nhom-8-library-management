@@ -1,5 +1,6 @@
 package com.group8.library_management.entity;
 
+import com.group8.library_management.enums.EntityType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,22 +19,23 @@ import java.time.LocalDateTime;
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "book_id", nullable = false)
-    private Book book;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EntityType entityType; // "BOOK", "USER", "AUTHOR", "PUBLISHER"
 
-    @Column(name = "image", nullable = false)
+    @Column(nullable = false)
+    private Integer entityId;
+
+    @Column(name = "image", nullable = false, length = 255)
     private String image;
 
     @Column(name = "is_cover", nullable = false)
-    @ColumnDefault("0")
-    private Boolean isCover;
+    @ColumnDefault("false")
+    private Boolean isCover = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 }
