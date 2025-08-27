@@ -23,6 +23,12 @@ public class FavoriteId implements Serializable {
     @Column(name = "book_id", nullable = false)
     private Integer bookId;
 
+    public FavoriteId() {}
+    public FavoriteId(Integer userId, Integer bookId) {
+        this.userId = userId;
+        this.bookId = bookId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
