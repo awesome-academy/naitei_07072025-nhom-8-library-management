@@ -2,8 +2,7 @@ package com.group8.library_management.entity;
 
 import com.group8.library_management.enums.BorrowRequestDetailStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,6 +11,9 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "borrow_request_details")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class BorrowRequestDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
