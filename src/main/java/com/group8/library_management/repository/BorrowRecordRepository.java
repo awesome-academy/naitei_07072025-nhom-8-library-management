@@ -3,6 +3,8 @@ package com.group8.library_management.repository;
 import com.group8.library_management.dto.response.DueSoonBookRes;
 import com.group8.library_management.entity.BorrowRecord;
 import com.group8.library_management.enums.BorrowRecordStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
