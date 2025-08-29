@@ -65,4 +65,8 @@ public class BorrowRecordServiceImpl implements BorrowRecordService {
         LocalDate limitDate = LocalDate.now().plusDays(1);
         return borrowRecordRepository.findDueSoonBooks(currentDate, limitDate);
     }
+    @Override
+    public boolean hasUserBorrowedBook(String username, Integer bookId) {
+        return borrowRecordRepository.existsByBorrowRequestDetail_BorrowRequest_User_UsernameAndBorrowRequestDetail_Copy_Book_Id(username, bookId);
+    }
 }

@@ -71,7 +71,6 @@ public class GlobalExceptionHandler {
         return redirectBackWithError(request, message);
     }
 
-
     /**
      * Handles các lỗi khác trong ứng dụng.
      *
@@ -132,11 +131,13 @@ public class GlobalExceptionHandler {
     /**
      * Handles lỗi từ chối truy cập do thiếu quyền.
      *
-     * @param ex ngoại lệ được ném ra khi người dùng không có quyền thực hiện hành động
+     * @param ex ngoại lệ được ném ra khi người dùng không có quyền thực hiện hành
+     *           động
      * @return ResponseEntity hoặc redirect MVC với thông điệp lỗi
      */
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public Object handleAccessDenied(org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
+    public Object handleAccessDenied(org.springframework.security.access.AccessDeniedException ex,
+                                     HttpServletRequest request) {
         logger.error("Access denied: {}", ex.getMessage());
         String message = getMessage("error.access.denied");
 
@@ -219,7 +220,8 @@ public class GlobalExceptionHandler {
      * @return ResponseEntity hoặc redirect MVC với thông điệp lỗi
      */
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
-    public Object handleNoHandlerFound(org.springframework.web.servlet.NoHandlerFoundException ex, HttpServletRequest request) {
+    public Object handleNoHandlerFound(org.springframework.web.servlet.NoHandlerFoundException ex,
+                                       HttpServletRequest request) {
         logger.error("No handler found for request: {} {}", ex.getHttpMethod(), ex.getRequestURL());
         String message = getMessage("error.endpoint.not.found");
 
@@ -231,9 +233,28 @@ public class GlobalExceptionHandler {
         return redirectBackWithError(request, message);
     }
 
+    /**
+     * Handles lỗi comment (CommentException).
+     *
+     * @param ex CommentException
+     * @return ResponseEntity hoặc redirect MVC với thông điệp lỗi
+     */
+    @ExceptionHandler(CommentException.class)
+    public Object handleCommentException(CommentException ex, HttpServletRequest request) {
+        logger.error("Comment error: {}", ex.getMessage());
+        String message = ex.getMessage() != null ? ex.getMessage() : getMessage("error.comment.failed");
+
+        if (isApiRequest(request)) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(BaseAPIRes.error(HttpStatus.BAD_REQUEST.value(), message));
+        }
+        return redirectBackWithError(request, message);
+    }
 
     /**
      * Chuyển hướng về trang trước đó với thông điệp lỗi (dành cho MVC của admin).
+     *
      * @param request HttpServletRequest
      * @param message tin nhắn báo lỗi
      * @return modalAndView để chuyển hướng

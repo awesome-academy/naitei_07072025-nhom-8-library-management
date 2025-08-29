@@ -47,4 +47,18 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Inte
             Integer userId,
             List<BorrowRecordStatus> statuses
     );
+    @Query("""
+        SELECT COUNT(br) > 0
+        FROM BorrowRecord br
+        JOIN br.borrowRequestDetail brd
+        JOIN brd.borrowRequest r
+        JOIN r.user u
+        JOIN brd.copy c
+        JOIN c.book b
+        WHERE u.username = :username 
+        AND b.id = :bookId
+        """)
+    boolean existsByBorrowRequestDetail_BorrowRequest_User_UsernameAndBorrowRequestDetail_Copy_Book_Id(String username, Integer bookId);
 }
+
+
